@@ -1,0 +1,23 @@
+{
+  "name": "golden-layout-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gscoppino/golden-layout-playground.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/gscoppino/golden-layout-playground/issues"
+  },
+  "homepage": "https://github.com/gscoppino/golden-layout-playground",
+  "dependencies": {
+    "d3": "^5.9.2",
+    "golden-layout": "^1.5.9",
+    "jquery": "^1.11.3"
+  }
+}
