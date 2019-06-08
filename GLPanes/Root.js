@@ -1,5 +1,5 @@
 import GLDataMasterPane from "./DataMaster.js";
-import GLDataViewPane from "./DataView.js";
+import GLDataDetailPane from "./DataDetail.js";
 
 export default function(state) {
   return {
@@ -8,8 +8,8 @@ export default function(state) {
       GLDataMasterPane({
         data: state.data
       }),
-      GLDataViewPane({
-        detail: state.data[0]
+      GLDataDetailPane({
+        detail: state.data.nodes[0]
       })
     ]
   };

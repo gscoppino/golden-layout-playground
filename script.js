@@ -4,7 +4,6 @@ import GLDataMasterPane from "./GLPanes/DataMaster.js";
 import GLComponentRegistry from "./GLComponents/registry.js";
 import { GLDataMasterComponent } from "./GLComponents/DataMaster.js";
 import { GLDataDetailComponent } from "./GLComponents/DataDetail.js";
-import { GLDataRenderComponent } from "./GLComponents/DataRender.js";
 import goldenLayoutInstance from "./GLInstance.js";
 import DataService from "./DataService.js";
 
@@ -25,10 +24,6 @@ goldenLayoutInstance.registerComponent(
 goldenLayoutInstance.registerComponent(
   GLComponentRegistry.DataDetail,
   GLDataDetailComponent
-);
-goldenLayoutInstance.registerComponent(
-  GLComponentRegistry.DataRender,
-  GLDataRenderComponent
 );
 
 // Retrieve data

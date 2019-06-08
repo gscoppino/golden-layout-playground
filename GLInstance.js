@@ -1,5 +1,5 @@
 import GLRootPane from "./GLPanes/Root.js";
-import GLDataViewPane from "./GLPanes/DataView.js";
+import GLDataDetailPane from "./GLPanes/DataDetail.js";
 import GLEventRegistry from "./GLEvents/registry.js";
 import DataService from "./DataService.js";
 
@@ -35,10 +35,14 @@ goldenLayout.on("stateChanged", () => {
 
 goldenLayout.eventHub.on(GLEventRegistry.DataMaster.LoadData, data => {
   goldenLayout.root.contentItems[0].addChild(
-    GLDataViewPane({
+    GLDataDetailPane({
       detail: data
     })
   );
+});
+
+$(window).on('resize', () => {
+  goldenLayout.updateSize($(window).width(), $(window).height());
 });
 
 export default goldenLayout;

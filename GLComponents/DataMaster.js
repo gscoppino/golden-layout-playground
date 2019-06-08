@@ -8,7 +8,11 @@ export class GLDataMasterComponent {
     this.container = container;
     this.state = state;
 
-    this.render(this.state, this.container.getElement());
+    // Wait so we can appropriately size the SVG to the same size as the container.
+    this.container.on('resize', () => {
+      this.render(state, container.getElement());
+      this.container.off('resize');
+    });
   }
 
   onSelectDetail(event) {
@@ -19,22 +23,82 @@ export class GLDataMasterComponent {
   }
 
   render(state, target) {
+    const MARGIN = { TOP: 20, RIGHT: 30, BOTTOM: 30, LEFT: 40 };
+    const CHART_WIDTH = target.width() - MARGIN.LEFT - MARGIN.RIGHT;
+    const CHART_HEIGHT = target.height() - MARGIN.TOP - MARGIN.BOTTOM;
+
     target.empty();
 
-    const list = $("<ul></ul>");
+    const svg = $(`<svg xmlns="http://www.w3.org/2000/svg"></svg>`);
+    target.append(svg);
 
-    const listElements = state.data.map(detail => {
-      const el = $(`<li>${detail.name}</li>`);
+    const diagram = d3
+      .select(svg.get(0))
+      .attr("width", CHART_WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
+      .attr("height", CHART_HEIGHT + MARGIN.TOP + MARGIN.BOTTOM);
 
-      el.css("margin", "1rem");
-      el.data("detail", detail);
-      el.on("click", this.onSelectDetail);
+    const nodeContainer = diagram
+      .append("g")
+      .selectAll("g")
+      .data(state.data.nodes)
+      .enter()
+      .append("g");
 
-      return el;
-    });
+    // Nodes
+    nodeContainer
+      .append("rect")
+      .attr("width", d => d.width)
+      .attr("height", d => d.height)
+      .attr("x", d => d.x)
+      .attr("y", d => d.y)
+      .attr("fill", "white")
+      .style("stroke", "black")
+      .style("stroke-width", "1");
 
-    list.append(listElements);
+    nodeContainer
+      .append("text")
+      .text(d => d.name)
+      .style("text-anchor", "middle")
+      .style("fill", "black")
+      .attr("x", d => d.x + d.width / 2)
+      .attr("y", d => d.y + d.height / 2)
+      .attr('dy', '0.35em'); // for centering
 
-    target.html(list);
+    // Connectors
+    // Create a node map first for improved performance
+    const nodeMap = state.data.nodes.reduce((map, node) => {
+      map[node.id] = node;
+      return map;
+    }, {});
+  
+    const connectorContainer = diagram
+      .append("g")
+      .selectAll("g")
+      .data(state.data.connectors)
+      .enter()
+      .append("g");
+
+    connectorContainer
+      .selectAll("line")
+      .data(state.data.connectors)
+      .enter()
+      .append("line")
+      .style('stroke', 'black')
+      .attr("x1", function (d) {
+        const node1 = nodeMap[d.connectionA];
+        return node1.x + node1.width;
+      })
+      .attr("y1", function (d) {
+        const node1 = nodeMap[d.connectionA];
+        return node1.y + (node1.height / 2);
+      })
+      .attr("x2", function (d) {
+        const node2 = nodeMap[d.connectionB];
+        return node2.x;
+      })
+      .attr("y2", function (d) {
+        const node2 = nodeMap[d.connectionB];
+        return node2.y + (node2.height / 2);
+      });
   }
 }
