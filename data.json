@@ -5,8 +5,6 @@
       "name": "Test 1",
       "width": 150,
       "height": 100,
-      "x": 10,
-      "y": 10,
       "formFields": [
         {
           "label": "Field 1",
@@ -33,8 +31,6 @@
       "name": "Test 2",
       "width": 150,
       "height": 100,
-      "x": 120,
-      "y": 120,
       "formFields": [
         {
           "label": "Field 1",
@@ -52,12 +48,23 @@
           "value": true
         }
       ]
+    },
+    {
+      "id": 3,
+      "name": "Test 3",
+      "width": 200,
+      "height": 150,
+      "formFields": []
     }
   ],
   "connectors": [
     {
-      "connectionA": 1,
-      "connectionB": 2
+      "source": 1,
+      "target": 2
+    },
+    {
+      "source": 1,
+      "target": 3
     }
   ]
 }

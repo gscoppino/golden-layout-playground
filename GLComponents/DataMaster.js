@@ -12,6 +12,29 @@ export class GLDataMasterComponent {
     this.container.on('resize', () => {
       this.render(state, container.getElement());
       this.container.off('resize');
+
+      let inc = 3;
+      // setInterval(() => {
+      //   if (this.simulation) {
+      //     this.simulation.stop();
+      //   }
+      //   state.data.nodes.push(
+      //     {
+      //       "id": ++inc,
+      //       "name": "Test " + inc,
+      //       "width": 200,
+      //       "height": 150,
+      //       "formFields": []
+      //     }
+      //   );
+
+      //   state.data.connectors.push({
+      //     source: 1,
+      //     target: inc
+      //   });
+
+      //   this.render(state, container.getElement());
+      // }, 2000);
     });
   }
 
@@ -37,68 +60,77 @@ export class GLDataMasterComponent {
       .attr("width", CHART_WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
       .attr("height", CHART_HEIGHT + MARGIN.TOP + MARGIN.BOTTOM);
 
-    const nodeContainer = diagram
-      .append("g")
-      .selectAll("g")
-      .data(state.data.nodes)
-      .enter()
-      .append("g");
+    const linkForce = d3
+      .forceLink(state.data.connectors)
+      .id(d => d.id)
+      .distance(d => Math.max(
+        Math.sqrt(d.source.width * d.source.width + d.source.height * d.source.height),
+        Math.sqrt(d.target.width * d.target.width + d.target.height * d.target.height)
+      ));
+    
+    const link = d3.linkHorizontal()
+      .x(d => d.x + d.width / 2)
+      .y(d => d.y + d.height / 2);
+
+    const simulation = d3
+      .forceSimulation()
+      .nodes(state.data.nodes)
+      .force('center', d3.forceCenter(CHART_WIDTH / 2, CHART_HEIGHT / 2))
+      // .force('charge', d3.forceManyBody().strength(d => -(Math.sqrt(d.width*d.width + d.height*d.height) / 2)))
+      .force('collide', d3.forceCollide().radius(d => Math.sqrt(d.width*d.width + d.height*d.height) / 2))
+      .force('link', linkForce);
+    
+    this.simulation = simulation;
+
+    // Connectors
+    const connectorContainer = diagram
+    .append("g")
+    .selectAll("g")
+    .data(state.data.connectors)
+    .enter()
+    .append("g");
+
+  const connectors = connectorContainer
+    .selectAll("path")
+    .data(state.data.connectors)
+    .enter()
+    .append("path")
+    .style('fill', 'none')
+    .style('stroke', 'black');
 
     // Nodes
-    nodeContainer
+    const nodeContainer = diagram
+    .append("g")
+    .selectAll("g")
+    .data(state.data.nodes)
+    .enter()
+    .append("g");
+    const nodes = nodeContainer
       .append("rect")
       .attr("width", d => d.width)
       .attr("height", d => d.height)
-      .attr("x", d => d.x)
-      .attr("y", d => d.y)
       .attr("fill", "white")
       .style("stroke", "black")
       .style("stroke-width", "1");
 
-    nodeContainer
+    const nodeText = nodeContainer
       .append("text")
       .text(d => d.name)
       .style("text-anchor", "middle")
-      .style("fill", "black")
-      .attr("x", d => d.x + d.width / 2)
-      .attr("y", d => d.y + d.height / 2)
-      .attr('dy', '0.35em'); // for centering
-
-    // Connectors
-    // Create a node map first for improved performance
-    const nodeMap = state.data.nodes.reduce((map, node) => {
-      map[node.id] = node;
-      return map;
-    }, {});
-  
-    const connectorContainer = diagram
-      .append("g")
-      .selectAll("g")
-      .data(state.data.connectors)
-      .enter()
-      .append("g");
-
-    connectorContainer
-      .selectAll("line")
-      .data(state.data.connectors)
-      .enter()
-      .append("line")
-      .style('stroke', 'black')
-      .attr("x1", function (d) {
-        const node1 = nodeMap[d.connectionA];
-        return node1.x + node1.width;
-      })
-      .attr("y1", function (d) {
-        const node1 = nodeMap[d.connectionA];
-        return node1.y + (node1.height / 2);
-      })
-      .attr("x2", function (d) {
-        const node2 = nodeMap[d.connectionB];
-        return node2.x;
-      })
-      .attr("y2", function (d) {
-        const node2 = nodeMap[d.connectionB];
-        return node2.y + (node2.height / 2);
+      .style("fill", "black");
+    
+      simulation.on('tick', () => {
+          nodes
+            .attr('x', d => d.x)
+            .attr('y', d => d.y);
+          
+          nodeText
+            .attr("x", d => d.x + d.width / 2)
+            .attr("y", d => d.y + d.height / 2)
+            .attr('dy', '0.35em'); // for centering
+          
+          connectors
+            .attr('d', link);
       });
   }
 }
